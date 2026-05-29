@@ -644,13 +644,15 @@ fun ExploreScreen(
                                 Text("Duration: ", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                 Text("${months} Months", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
                             }
+                            val durationRange = when(phone.category) {
+                                PhoneCategory.KEYPAD -> 3f..6f
+                                else -> 3f..12f
+                            }
+                            val coercedMonths = months.toFloat().coerceIn(durationRange)
                             Slider(
-                                value = months.toFloat(),
+                                value = coercedMonths,
                                 onValueChange = { viewModel.customSheetDuration.value = it.toInt() },
-                                valueRange = when(phone.category) {
-                                    PhoneCategory.KEYPAD -> 3f..6f
-                                    else -> 3f..12f
-                                },
+                                valueRange = durationRange,
                                 steps = when(phone.category) {
                                     PhoneCategory.KEYPAD -> 2
                                     else -> 8
@@ -665,14 +667,16 @@ fun ExploreScreen(
                                 Text("Down Payment: ", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                 Text("${downPayPercent}% (Rs. ${breakdown.downPaymentAmount.toInt()})", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
                             }
+                            val downPayRange = when(phone.category) {
+                                PhoneCategory.KEYPAD -> 0f..30f
+                                PhoneCategory.TOUCH -> 10f..40f
+                                PhoneCategory.IPHONE -> 25f..50f
+                            }
+                            val coercedDownPay = downPayPercent.toFloat().coerceIn(downPayRange)
                             Slider(
-                                value = downPayPercent.toFloat(),
+                                value = coercedDownPay,
                                 onValueChange = { viewModel.customSheetDownPaymentPercent.value = it.toInt() },
-                                valueRange = when(phone.category) {
-                                    PhoneCategory.KEYPAD -> 0f..30f
-                                    PhoneCategory.TOUCH -> 10f..40f
-                                    PhoneCategory.IPHONE -> 25f..50f
-                                },
+                                valueRange = downPayRange,
                                 steps = 3,
                                 modifier = Modifier.height(28.dp)
                             )
@@ -963,11 +967,30 @@ fun MobileCard(
                     )
                 }
 
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 1.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Verified,
+                        contentDescription = null,
+                        modifier = Modifier.size(11.dp),
+                        tint = Color(0xFF2E7D32)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "100% Original & Authentic",
+                        fontSize = 10.sp,
+                        color = Color(0xFF2E7D32),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Estimate Monthly Payments (calculated on standard percentages)
+                // Estimate Monthly Payments (calculated on updated standard percentages)
                 val sampleBreakdown = if (phone.price <= 6000) phone.price / phone.installmentDurationMonths 
-                                      else (phone.price * 0.85) * (1 + 0.012 * phone.installmentDurationMonths) / phone.installmentDurationMonths
+                                      else (phone.price * 0.85) * (1 + 0.015 * phone.installmentDurationMonths) / phone.installmentDurationMonths
                 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -981,11 +1004,35 @@ fun MobileCard(
                             fontWeight = FontWeight.Black,
                             color = Color(0xFF006D5B)
                         )
-                        Text(
-                            text = "Price: Rs. ${phone.price.toInt()}",
-                            fontSize = 9.sp,
-                            color = Color(0xFF9CA3AF)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            Text(
+                                text = "Rs. ${phone.price.toInt()}",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1F2937)
+                            )
+                            Text(
+                                text = "Rs. ${(phone.price * 1.05).toInt()}",
+                                fontSize = 8.sp,
+                                color = Color(0xFF9CA3AF),
+                                style = androidx.compose.ui.text.TextStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough)
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0xFFFFECEC), shape = RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 3.dp, vertical = 1.dp)
+                            ) {
+                                Text(
+                                    text = "5% OFF",
+                                    fontSize = 7.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFD32F2F)
+                                )
+                            }
+                        }
                     }
                     
                     Box(
@@ -1046,7 +1093,7 @@ fun CalculatorScreen(
             color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = "Calculate dynamic monthly installments with live markup estimation for any custom mobile model.",
+            text = "Calculate dynamic monthly installments with live plan estimation for any custom mobile model.",
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
@@ -1092,7 +1139,7 @@ fun CalculatorScreen(
                 }
 
                 // Category selection rows
-                Text("Select Category (Influences Markup Standard):", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Select Category (Influences Pricing Plan):", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -1104,7 +1151,20 @@ fun CalculatorScreen(
                     ).forEach { (catType, label) ->
                         val isSelected = category == catType
                         OutlinedButton(
-                            onClick = { viewModel.calculatorCategory.value = catType },
+                            onClick = { 
+                                viewModel.calculatorCategory.value = catType 
+                                val newDurationRange = when (catType) {
+                                    PhoneCategory.KEYPAD -> 3..6
+                                    else -> 3..12
+                                }
+                                val newDownPaymentRange = when (catType) {
+                                    PhoneCategory.KEYPAD -> 0..30
+                                    PhoneCategory.TOUCH -> 10..40
+                                    PhoneCategory.IPHONE -> 25..50
+                                }
+                                viewModel.calculatorDuration.value = viewModel.calculatorDuration.value.coerceIn(newDurationRange)
+                                viewModel.calculatorDownPaymentPercent.value = viewModel.calculatorDownPaymentPercent.value.coerceIn(newDownPaymentRange)
+                            },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent
@@ -1137,13 +1197,15 @@ fun CalculatorScreen(
                     Text("Duration Period:", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     Text("$duration Months", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
+                val durationRange = when (category) {
+                    PhoneCategory.KEYPAD -> 3f..6f
+                    else -> 3f..12f
+                }
+                val coercedDuration = duration.toFloat().coerceIn(durationRange)
                 Slider(
-                    value = duration.toFloat(),
+                    value = coercedDuration,
                     onValueChange = { viewModel.calculatorDuration.value = it.toInt() },
-                    valueRange = when (category) {
-                        PhoneCategory.KEYPAD -> 3f..6f
-                        else -> 3f..12f
-                    },
+                    valueRange = durationRange,
                     steps = when (category) {
                         PhoneCategory.KEYPAD -> 2
                         else -> 8
@@ -1157,14 +1219,16 @@ fun CalculatorScreen(
                     Text("Down Payment Target:", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     Text("$downPaymentPercent% (Rs. ${breakdown.downPaymentAmount.toInt()})", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
+                val downPayRange = when (category) {
+                    PhoneCategory.KEYPAD -> 0f..30f
+                    PhoneCategory.TOUCH -> 10f..40f
+                    PhoneCategory.IPHONE -> 25f..50f
+                }
+                val coercedDownPercent = downPaymentPercent.toFloat().coerceIn(downPayRange)
                 Slider(
-                    value = downPaymentPercent.toFloat(),
+                    value = coercedDownPercent,
                     onValueChange = { viewModel.calculatorDownPaymentPercent.value = it.toInt() },
-                    valueRange = when (category) {
-                        PhoneCategory.KEYPAD -> 0f..30f
-                        PhoneCategory.TOUCH -> 10f..40f
-                        PhoneCategory.IPHONE -> 25f..50f
-                    },
+                    valueRange = downPayRange,
                     steps = 3
                 )
             }
@@ -1555,10 +1619,14 @@ fun ApplyScreen(
                     }
                     IconButton(
                         onClick = {
-                            val clipboardManager = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                            val clip = android.content.ClipData.newPlainText("Easypaisa", "03316215263")
-                            clipboardManager.setPrimaryClip(clip)
-                            Toast.makeText(context, "Easypaisa Number Copied", Toast.LENGTH_SHORT).show()
+                            try {
+                                val clipboardManager = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                val clip = android.content.ClipData.newPlainText("Easypaisa", "03316215263")
+                                clipboardManager.setPrimaryClip(clip)
+                                Toast.makeText(context, "Easypaisa Number Copied", Toast.LENGTH_SHORT).show()
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Copy failed: Please type manually", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier.size(28.dp)
                     ) {
@@ -1598,10 +1666,14 @@ fun ApplyScreen(
                     }
                     IconButton(
                         onClick = {
-                            val clipboardManager = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                            val clip = android.content.ClipData.newPlainText("Naya Pay", "03482640090")
-                            clipboardManager.setPrimaryClip(clip)
-                            Toast.makeText(context, "Naya Pay Number Copied", Toast.LENGTH_SHORT).show()
+                            try {
+                                val clipboardManager = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                val clip = android.content.ClipData.newPlainText("Naya Pay", "03482640090")
+                                clipboardManager.setPrimaryClip(clip)
+                                Toast.makeText(context, "Naya Pay Number Copied", Toast.LENGTH_SHORT).show()
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Copy failed: Please type manually", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier.size(28.dp)
                     ) {
@@ -1641,10 +1713,14 @@ fun ApplyScreen(
                     }
                     IconButton(
                         onClick = {
-                            val clipboardManager = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                            val clip = android.content.ClipData.newPlainText("Sadapay", "03482640090")
-                            clipboardManager.setPrimaryClip(clip)
-                            Toast.makeText(context, "Sadapay Number Copied", Toast.LENGTH_SHORT).show()
+                            try {
+                                val clipboardManager = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                val clip = android.content.ClipData.newPlainText("Sadapay", "03482640090")
+                                clipboardManager.setPrimaryClip(clip)
+                                Toast.makeText(context, "Sadapay Number Copied", Toast.LENGTH_SHORT).show()
+                            } catch(e: Exception) {
+                                Toast.makeText(context, "Copy failed: Please type manually", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier.size(28.dp)
                     ) {
@@ -2131,7 +2207,7 @@ fun SupportScreen(
         listOf(
             "100% Original Packed Mobiles" to "We only deliver officially warranty-packed items in original containers.",
             "Trusted Installment Service" to "Over 5 years of serving happy verified clients in Punjab, Sindh & Islamabad.",
-            "Lowest Monthly Payments" to "No hidden markups. Transparent customizable plan simulations for every packet.",
+            "Lowest Monthly Payments" to "Best market standards. Transparent customizable plan simulations for every packet.",
             "Fast Verification & App approvals" to "Swift approval process with minimal guarantees (ID copying, bills).",
             "Delivery to All Major Cities" to "Secure shipping with packing guarantees to Lahore, Karachi, Islamabad, Faisalabad, and more."
         ).forEach { (title, description) ->

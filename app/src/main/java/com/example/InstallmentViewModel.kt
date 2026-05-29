@@ -146,15 +146,8 @@ class InstallmentViewModel(application: Application) : AndroidViewModel(applicat
         val downPayAmount = price * (downPayPercent / 100.0)
         val remainingAmt = price - downPayAmount
         
-        // Markup rate based on category and months
-        // Keypad has extremely low markup (0% if under 5 months, otherwise 0.8% per month)
-        // Smartphones: 1.2% per month flat markup
-        // iPhones: 1.4% per month flat markup
-        val monthlyMarkupRate = when(category) {
-            PhoneCategory.KEYPAD -> if (months <= 5) 0.0 else 0.008
-            PhoneCategory.TOUCH -> 0.012
-            PhoneCategory.IPHONE -> 0.014
-        }
+        // Monthly rate set to 1.5% (representing 18% simple annual interest rate)
+        val monthlyMarkupRate = 0.015
         
         val totalMarkup = remainingAmt * (monthlyMarkupRate * months)
         val repayableAmount = remainingAmt + totalMarkup
