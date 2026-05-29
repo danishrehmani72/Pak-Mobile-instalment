@@ -1,0 +1,6 @@
+{
+  "name": "Mobile Installments Pakistan",
+  "description": "Buy mobiles (Keypad, Touch, and iPhones) on easy monthly installments with custom installment calculator, online inquiry, and WhatsApp integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

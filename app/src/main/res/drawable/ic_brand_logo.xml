@@ -1,0 +1,48 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Ambient Shadow/Glow -->
+    <path
+        android:fillColor="#0A006D5B"
+        android:pathData="M32,32m-30,0a30,30 0,1 1,60 0a30,30 0,1 1,-60 0" />
+
+    <!-- Premium Outer Circle Base -->
+    <path
+        android:fillColor="#DFEFEF"
+        android:pathData="M32,32m-26,0a26,26 0,1 1,52 0a26,26 0,1 1,-52 0" />
+
+    <!-- Inner Emerald Shield/Hexagon Badge -->
+    <path
+        android:fillColor="#006D5B"
+        android:pathData="M32,10 L50,19 L50,45 L32,54 L14,45 L14,19 Z" />
+
+    <!-- Stylized Mobile Screen (White Inner Glow) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,15 L45,21.5 L45,42.5 L32,49 L19,42.5 L19,21.5 Z" />
+
+    <!-- Brand Emblem Motif: Overlapping Chevron arrow representing Easy Split Monthly Installments (Teal & Gold accents) -->
+    <!-- First installment tier leaf (Teal) -->
+    <path
+        android:fillColor="#006D5B"
+        android:pathData="M24,24 L32,20 L40,24 L32,28 Z" />
+
+    <!-- Second installment tier leaf (Medium Teal) -->
+    <path
+        android:fillColor="#008B75"
+        android:pathData="M24,30 L32,26 L40,30 L32,34 Z" />
+
+    <!-- Third dynamic entry growth leaf representing client ownership (Metallic Warm Gold) -->
+    <path
+        android:fillColor="#EA580C"
+        android:pathData="M24,36 L32,32 L40,36 L32,40 Z" />
+
+    <!-- Dynamic Sparkle/Star indicator of official partnership trust -->
+    <path
+        android:fillColor="#E0A96D"
+        android:pathData="M32,41 L33,43 L35,43 L33,44 L34,46 L32,45 L30,46 L31,44 L29,43 L31,43 Z" />
+
+</vector>
